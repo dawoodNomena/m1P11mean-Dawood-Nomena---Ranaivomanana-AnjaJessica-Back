@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 const Service = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
-    nom : String,
+    nom : {type: String, required: true},
     prix : { type: Number, required: true},
     description : Text,
     duree: {type: Number, required: true},

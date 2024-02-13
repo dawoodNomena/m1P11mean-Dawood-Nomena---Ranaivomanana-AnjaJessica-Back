@@ -83,6 +83,16 @@ const Logout = (req, res, next) => {
     })
 };
 
+const GetUser = (req, res, next) => {
+    const id = req.params.id
+    const user = User.find({_id: id, active: true});
+    if (!user){
+        res.status(404).json({message : "Utilisateur introuvable!"})
+    }else{
+        res.status(200).json({user})
+    }
+};
+
 const AddUser =  async (req, res, next) => {
     const employe = await User.find({mail : req.body.mail, active: true});
     if (employe.lenght > 0){
@@ -117,8 +127,8 @@ const UpdateUser = async (req, res, next) => {
         res.status(404).json({message : "Utilisateur introuvable!"})
     } else{
         await User.updateOne({_id : req.params.id}, {mail : req.body.mail, nom: req.body.nom, prenom: req.body.prenom, tel: req.body.tel})
+        .then( () => res.status(200).json({message: "Utilisateur modifié."}))
         .catch( error => res.status(400).json({ error }))
-        res.status(200).json({message: "Utilisateur modifié."})
     }
 }
 
@@ -128,12 +138,12 @@ const DeleteUser = async (req, res, next) => {
         res.status(404).json({message : "Utilisateur introuvable!"})
     } else {
         await User.updateOne({_id: req.params.id}, {active: false})
+        .then(() => res.status(200).json({message: "Utilisateur supprimé."}))
         .catch(error => res.status(400).json({ error }))
-        res.status(200).json({message: "Utilisateur supprimé."})
     }
     
 }
 
-module.exports = { Sign_up, Login, Logout, AddUser, UpdateUser, DeleteUser}
+module.exports = { Sign_up, Login, Logout, GetUser, AddUser, UpdateUser, DeleteUser}
 
 
