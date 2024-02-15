@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+const mongoose = require('./../../database/dbManager').mongo
 
 const User = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
@@ -8,7 +8,7 @@ const User = mongoose.Schema({
     tel : {type: String, required:true},
     mdp : {type: String, required:true, min:6},
     role : {type: String, default: 'ROLE_EMPLOYE'},
-    active : {type: Boolean, default: True}
+    active : {type: Boolean, default: true}
 })
 
 module.exports = mongoose.model('User', User)

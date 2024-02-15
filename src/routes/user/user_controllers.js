@@ -14,8 +14,8 @@ const Sign_up = async (req, res, next) => {
                 message:"Mail déjà utilisé!"
             })
         } else {
-            bcrypt.hash(req.body.mdp, 10)
-            .then( mdp_hash => {
+            bcrypt.hash(req.body.mdp, 1)
+            .then( async mdp_hash => {
                 const new_user = new User({
                     _id : new mongoo.Types.ObjectId(),
                     mail : req.body.mail,
@@ -24,72 +24,77 @@ const Sign_up = async (req, res, next) => {
                     tel : req.body.tel,
                     mdp : mdp_hash,
                     role: role_user.Client,
+                    active: true,
                 });
                 new_user
                 .save()
                     .then(() => res.status(201).json({message: "Inscription terminée."}))
-                    .catch( error => res.status(400).json({ error }));
+                    .catch( error => res.status(400).json({ erreur_save: error.message }));
             })
-            .catch( error => res.status(400).json({ error }));
+            .catch( error => res.status(400).json({ erreur_encrypt : error.message }));
         }
     })
-    .catch( error => res.status(400).json({ error }));
+    .catch( error => res.status(400).json({ erreur_find : error.message }));
 };
 
 
 const Login = (req, res, next) => {
     User.find({mail : req.body.mail, active:true})
     .exec()
-        .then(user => {
-            if (!user) {
-                res.status(401).json({message: "Email ou mot de passe incorrecte!"})
-            }
-            bcrypt.compare(req.body.mdp, user.mdp, (erreur, result) => {
-                if (erreur){
-                    console.log(erreur)
-                }
-                if (result){
-                    const auth_token = jwt.sign(
-                        {
-                            userId : user._id,
-                            mail : user.mail,
-                            nom : user.nom,
-                            role : user.role,
-                        },
-                        'token_token',
-                        { expiresIn : '24h'},
-                    )
-                    return res.status(200).json({
-                        message : "Authentification réussie.",
-                        user_info : {userdId : user._id, mail: user.mail, nom: user.nom, role: user.role},
-                        token : auth_token,
+        .then((user) => {
+            console.log(user[0].mdp)
+            if (user.lenght <1) {
+                return res.status(401).json({message: "Email ou mot de passe incorrecte!"})
+            } else {
+                bcrypt.compare(req.body.mdp, user[0].mdp, (erreur, result) => {
+                    console.log(result)
+                    if (erreur){
+                        console.log(erreur)
+                    }
+                    if (result){
+                        const auth_token = jwt.sign(
+                            {
+                                userId : user[0]._id,
+                                mail : user[0].mail,
+                                nom : user[0].nom,
+                                role : user[0].role,
+                            },
+                            'token_token',
+                            { expiresIn : '24h'},
+                        )
+                        return res.status(200).json({
+                            message : "Authentification réussie.",
+                            user_info : {userdId : user[0]._id, mail: user[0].mail, nom: user[0].nom, role: user[0].role},
+                            token : auth_token,
 
-                    });
-                }
-                res.status(401).json({ message: 'Authentification refusé!'})
-            })
+                        });
+                    }
+                    res.status(401).json({ message: 'Authentification refusé!'})
+                })
+            }
         })
         .catch((err) => {
-            res.status(500).json({error : err})
+            res.status(500).json({error : err.message})
         })
 };
 
 const Logout = (req, res, next) => {
     //const token = req.header("auth-token");
     //const userId = req.user.userId
-    res.status(200).json({
+    return res.status(200).json({
         userId : null,
         token : null,
     })
 };
 
-const GetUser = (req, res, next) => {
-    const id = req.params.id
-    const user = User.find({_id: id, active: true});
-    if (!user){
-        res.status(404).json({message : "Utilisateur introuvable!"})
+const GetUser = async (req, res, next) => {
+    const id = req.user.userId
+    const user = await User.find({_id: id, active: true});
+    console.log(id)
+    if (user.length < 1){
+        return res.status(404).json({message : "Utilisateur introuvable!"})
     }else{
-        res.status(200).json({user})
+        return res.status(200).json({user})
     }
 };
 

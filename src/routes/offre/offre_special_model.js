@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+const mongoose = require('./../../database/dbManager').mongo
 
 const OffreSpeciale = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,

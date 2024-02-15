@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+const mongoose = require('./../../database/dbManager').mongo
 
 const Rdv = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,

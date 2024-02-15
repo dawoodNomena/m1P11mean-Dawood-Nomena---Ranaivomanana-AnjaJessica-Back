@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
     if (!token) return res.status(400).send({ error: "Accès refusé!, Pas de token" });
   
     try {
-      const verified = jwt.verify(token, process.env.jwtSecret);
+      const verified = jwt.verify(token, 'token_token');
       req.user = verified;
       next();
     } catch (err) {

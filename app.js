@@ -3,6 +3,7 @@ var express = require('express')
 const bodyParser = require('body-parser');
 const cors = require('cors');
 var http = require('http');
+var debug = require('debug')('m1p11mean-Dawood-Nomena---Ranaivomanana-AnjaJessica-Back:server');
 
 var users_routes = require('./src/routes/user/user_routes')
 
@@ -32,7 +33,7 @@ app.use(function(req, res, next) {
 
   // Server
 
-  var port = normalizePort(process.env.PORT || '3002');
+  var port = normalizePort('3000' || '3002');
   app.set('port', port);
   
   /**
@@ -48,6 +49,8 @@ app.use(function(req, res, next) {
   server.listen(port, '0.0.0.0');
   server.on('error', onError);
   server.on('listening', onListening);
+  console.log("Attente des requêtes au port "+port);
+
   
   /**
    * Normalize a port into a number, string, or false.
