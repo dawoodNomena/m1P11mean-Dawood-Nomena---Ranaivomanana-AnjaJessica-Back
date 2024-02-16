@@ -6,6 +6,7 @@ var http = require('http');
 var debug = require('debug')('m1p11mean-Dawood-Nomena---Ranaivomanana-AnjaJessica-Back:server');
 
 var users_routes = require('./src/routes/user/user_routes')
+var services_routes = require('./src/routes/service/service_routes')
 
 var app = express();
 
@@ -15,6 +16,7 @@ app.use(bodyParser.json());
 
 //Routes 
 app.use('/users', users_routes)
+app.use('/services', services_routes)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
