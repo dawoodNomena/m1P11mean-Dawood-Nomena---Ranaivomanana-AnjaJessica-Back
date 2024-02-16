@@ -33,7 +33,7 @@ const CreateService = async (req, res, next) => {
         new_service
             .save()
                 .then(() => res.status(201).json({message: "Service créée!"}))
-                .catch( error => res.status(400).json({error}));
+                .catch( error => res.status(400).json({erreur: error.message}));
     }
 };
 
@@ -44,7 +44,7 @@ const UpdateService = async (req, res, next) => {
     } else {
         await Service.updateOne({_id : req.params.id}, {nom: req.body.nom,prix: req.body.prix,description: req.body.description,duree: req.body.duree,commission: req.body.commission,categorie: req.body.categorie,})
             .then(() => res.status(200).json({message : "Service modifié."}))
-            .catch(error => res.status(400).json({error}))
+            .catch(error => res.status(400).json({erreur : error.message}))
     }
 };
 
@@ -55,7 +55,7 @@ const DeleteService = async (req,res,next) => {
     } else {
         await Service.updateOne({_id: req.params.id}, {active: false})
             .then(() => res.status(200).json({message: "Service supprimé!"}))
-            .catch((error) => res.status(400).json({error}));
+            .catch((error) => res.status(400).json({erreur : error.message}));
     }
 };
 
