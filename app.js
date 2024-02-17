@@ -8,6 +8,7 @@ var debug = require('debug')('m1p11mean-Dawood-Nomena---Ranaivomanana-AnjaJessic
 var users_routes = require('./src/routes/user/user_routes')
 var services_routes = require('./src/routes/service/service_routes')
 var permission_routes = require('./src//routes/permission/permission_routes')
+var depense_routes = require('./src//routes/depense/depense_routes')
 
 var app = express();
 
@@ -19,6 +20,7 @@ app.use(bodyParser.json());
 app.use('/users', users_routes)
 app.use('/services', services_routes)
 app.use('/permission', permission_routes)
+app.use('/depenses', depense_routes)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

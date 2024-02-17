@@ -81,9 +81,9 @@ const Login = (req, res, next) => {
 const Logout = (req, res, next) => {
     //const token = req.header("auth-token");
     //const userId = req.user.userId
+    delete req.header("auth-token")
     return res.status(200).json({
-        userId : null,
-        token : null,
+        message : "Utilisateur déconnecté."
     })
 };
 

@@ -7,7 +7,7 @@ const RoleUser = require("../../static/Role_user")
 // Authentification
 router.post('/signup', controllers_user.Sign_up)
 router.post('/login', controllers_user.Login)
-router.post('/logout', controllers_user.Logout)
+router.post('/logout',Authentification_token, controllers_user.Logout)
 
 //Profil
 router.get('/profil',Authentification_token, controllers_user.GetUser)
