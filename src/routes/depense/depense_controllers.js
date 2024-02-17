@@ -43,7 +43,7 @@ const GetDepense = async (req, res, next) => {
     if (!depense){
         return res.status(404).json({message: "Dépense inexistante!"});
     } else {
-        return res.status(200).json({depense});
+        return res.status(200).json(depense);
     }
 };
 
