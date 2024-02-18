@@ -2,14 +2,13 @@ const res = require("express/lib/response");
 const mongoo = require("mongoose")
 const Offre = require("./offre_special_model")
 
-
 const AddOffre = async (req, res, next) => {
     const new_offre = new Offre({
         _id: new mongoo.Types.ObjectId(),
         service_id: req.body.service_id,
         date_debut : req.body.date_debut,
         date_fin : req.body.date_fin,
-        description : req.description
+        description : req.body.description
     });
     await new_offre
     .save()
@@ -22,7 +21,7 @@ const UpdateOffre = async (req, res, next) => {
     if (!offre){
         res.status(404).json({message: "Offre introuvable!"});
     } else { 
-        await Offre.updateOne({_id: req.params.id}, {service_id: req.body.service_id, date_debut : req.body.date_debut, date_fin : req.body.date_fin,description : req.description})
+        await Offre.updateOne({_id: req.params.id}, {service_id: req.body.service_id, date_debut : req.body.date_debut, date_fin : req.body.date_fin,description : req.body.description})
             .then(() => res.status(200).json({message : "Offre modifié"}))
             .catch(error => res.status(400).json({erreur : error.message}));
     }
@@ -41,7 +40,8 @@ const DeleteOffre = async (req, res, next) => {
 
 const GetOffre = async (req, res, next) => {
     const id = req.params.id;
-    const offre = Offre.find({_id: id});
+    const offre = await Offre.findOne({_id: id}).exec();
+    console.log(offre)
     if (!offre){
         return res.status(404).json({erreur: "Offre introuvable"})
     } else {
@@ -52,13 +52,12 @@ const GetOffre = async (req, res, next) => {
 
 const ListOffre = async (req, res, next) => {
     await Offre.find().exec()
-        .then((result) => {
+        .then( async (result) => {
             return res.status(200).json(result);
         })
         .catch((error) => {
             res.status(400).json({erreur : error.message})
-        })
-        
+        });
 };
 
 

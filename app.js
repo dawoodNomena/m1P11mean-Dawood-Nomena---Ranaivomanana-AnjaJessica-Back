@@ -22,7 +22,7 @@ app.use('/users', users_routes)
 app.use('/services', services_routes)
 app.use('/permission', permission_routes)
 app.use('/depenses', depense_routes)
-app.use('/offre', offre_routes)
+app.use('/offres', offre_routes)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
