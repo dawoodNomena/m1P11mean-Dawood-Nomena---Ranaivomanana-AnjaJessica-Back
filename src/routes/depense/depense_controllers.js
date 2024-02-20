@@ -1,5 +1,6 @@
 const mongoo = require("mongoose")
 const Depense = require("./depense_model")
+const moment = require('moment-timezone');
 
 const AddDepense = async (req,res,next) => {
     const new_depense = new Depense({
@@ -7,7 +8,7 @@ const AddDepense = async (req,res,next) => {
         type: req.body.type,
         nom: req.body.nom,
         montant: req.body.montant,
-        date : req.body.date
+        date : moment.tz(req.body.date, 'GMT+3').format()
     });
     new_depense
     .save()
@@ -20,7 +21,7 @@ const UpdateDepense = async (req, res, next) => {
     if (!depense){
         res.status(404).json({message: "Dépense introuvable!"});
     } else {
-        await Depense.updateOne({_id : req.params.id}, {type: req.body.type,nom: req.body.nom,montant: req.body.montant,date : req.body.date})
+        await Depense.updateOne({_id : req.params.id}, {type: req.body.type,nom: req.body.nom,montant: req.body.montant,date : moment.tz(req.body.date, 'GMT+3').format()})
             .then(() => res.status(200).json({message : "Dépense modifiée"}))
             .catch((error) => res.status(400).json({erreur : error.message}))
     }

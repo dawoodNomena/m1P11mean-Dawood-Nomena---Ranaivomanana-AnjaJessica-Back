@@ -8,4 +8,4 @@ const Rdv = mongoose.Schema({
     etat : { type: String, default:'Rdv'}
 })
 
-module.exports = mongoose.model('Rdv', Rdv)
+module.exports = mongoose.model('Rendez_vous', Rdv)

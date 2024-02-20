@@ -1,12 +1,14 @@
 
 const mongoo = require("mongoose")
 const Permission = require("./permission_model")
+const moment = require('moment-timezone');
+
 
 const AddPermission = (req, res, next) => {
     const new_permission = new Permission({
         _id: new mongoo.Types.ObjectId(),
         employe_id : req.user.userId,
-        date : req.body.date,
+        date : moment.tz(req.body.date, 'GMT+3').format(),
         duree : req.body.duree
     });
     new_permission

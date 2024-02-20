@@ -12,6 +12,7 @@ var depense_routes = require('./src/routes/depense/depense_routes')
 var offre_routes = require('./src/routes/offre/offre_routes')
 var preference_routes = require('./src/routes/preference/preference_routes')
 var salaire_routes = require('./src/routes/salaire/salaire_routes')
+var rdv_routes = require('./src/routes/rdv/rdv_routes')
 
 var app = express();
 
@@ -27,6 +28,7 @@ app.use('/depenses', depense_routes)
 app.use('/offres', offre_routes)
 app.use('/preferences', preference_routes)
 app.use('/salaires', salaire_routes)
+app.use('/rdv', rdv_routes)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

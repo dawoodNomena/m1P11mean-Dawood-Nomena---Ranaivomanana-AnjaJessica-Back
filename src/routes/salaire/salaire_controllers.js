@@ -1,20 +1,20 @@
 
-const req = require("express/lib/request");
 const mongoo = require("mongoose")
 const Salaire = require("./salaire_model")
+const moment = require('moment-timezone');
 
 const AddSalaire = async (req, res, next) => {
-    const salaire = await Salaire.find({user_id: req.body.user_id, date_debut: req.body.date_debut});
+    const salaire = await Salaire.find({user_id: req.body.user_id, date_debut: moment.tz(req.body.date_debut, 'GMT+3').format()});
     if (salaire.length < 1){
         const new_salaire = new Salaire({
             _id: new mongoo.Types.ObjectId(),
             user_id : req.body.user_id,
             somme :req.body.somme,
-            date_debut : req.body.date_debut,
+            date_debut : moment.tz(req.body.date_debut, 'GMT+3').format()
         });
-        await Salaire.updateOne({date_fin : "", user_id: req.body.user_id}, {date_fin : req.body.date_debut}) // Update date fin du dernier salaire 
-        .then(() => res.status(200).json({message : "Mis à jour ancien salaire avec succès!"}))
-        .catch(error => res.status(400).json({erreur : error.message}));
+        await Salaire.updateOne({date_fin : "", user_id: req.body.user_id}, {date_fin : moment.tz(req.body.date_debut, 'GMT+3').format()}); // Update date fin du dernier salaire 
+        /*.then(() => res.status(200).json({message : "Mis à jour ancien salaire avec succès!"}))
+        .catch(error => res.status(400).json({erreur : error.message}));*/
         new_salaire.save()
             .then(() => res.status(200).json({message : "Nouveau salaire ajouté."}))
             .catch(error => res.status(400).json({erreur : error.message}));
@@ -29,7 +29,7 @@ const UpdateSalaire = async (req, res, next) => {
     if (!salaire){
         res.status(409).json({message : "Salaire introuvable!"})
     } else {
-        await Salaire.updateOne({_id : req.params.id}, {user_id : req.body.user_id, somme :req.body.somme, date_debut : req.body.date_debut,})
+        await Salaire.updateOne({_id : req.params.id}, {user_id : req.body.user_id, somme :req.body.somme, date_debut : moment.tz(req.body.date_debut, 'GMT+3').format(),})
         .then(() => res.status(200).json({message : "Salaire modifié."}))
         .catch(error => res.status(400).json({erreur : error.message}))
     }
