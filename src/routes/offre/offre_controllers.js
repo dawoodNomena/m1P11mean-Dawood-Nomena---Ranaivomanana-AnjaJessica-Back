@@ -2,6 +2,7 @@ const res = require("express/lib/response");
 const mongoo = require("mongoose")
 const Offre = require("./offre_special_model")
 const moment = require('moment-timezone');
+const Mail_controllers = require('./../../mail/mail_controllers')
 
 
 const AddOffre = async (req, res, next) => {
@@ -12,10 +13,13 @@ const AddOffre = async (req, res, next) => {
         date_fin : moment.tz(req.body.date_fin, 'GMT+3').format(),
         description : req.body.description
     });
-    await new_offre
-    .save()
-        .then(() => res.status(200).json({message : "Offre speciale créée."}))
-        .catch(error => res.status(400).json({erreur: error.message}))
+    try{
+        await new_offre.save();
+        Mail_controllers.Mail_new_offre(new_offre);
+        res.status(200).json({message : "Offre speciale créée."})
+    } catch(error){
+        res.status(400).json({erreur: error.message})
+    }
 };
 
 const UpdateOffre = async (req, res, next) => {
