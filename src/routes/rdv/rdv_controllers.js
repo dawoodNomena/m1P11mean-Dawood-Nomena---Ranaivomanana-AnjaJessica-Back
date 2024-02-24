@@ -102,4 +102,4 @@ const ListByEmploye = async (req, res, next) => {
 };
 
 
-module.exports = {AddRdv, TerminerRdv, ListByClient, ListByEmploye  }
+module.exports = {AddRdv, TerminerRdv, ListByClient, ListByEmploye, TotalDureeRdv}

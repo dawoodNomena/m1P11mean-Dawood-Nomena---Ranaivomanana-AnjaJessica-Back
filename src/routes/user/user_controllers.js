@@ -4,6 +4,13 @@ const jwt = require("jsonwebtoken");
 const mongoo = require("mongoose");
 const User = require("./user_model");
 const role_user = require("../../static/Role_user")
+const moment = require('moment-timezone');
+const Rdv = require('./../rdv/rdv_model');
+const Service = require('./../service/service_model')
+const Rdv_controllers = require('./../rdv/rdv_controllers');
+const Permission = require('./../permission/permission_model')
+const RdvState = require('./../../static/Etat_rdv')
+const {addHours, format} = require('date-fns');
 
 const Sign_up = async (req, res, next) => {
     User.find({mail : req.body.mail, active:true})
@@ -124,7 +131,7 @@ const AddUser =  async (req, res, next) => {
             })
             .catch( error => res.status(400).json({ error }));
         }
-}
+};
 
 const UpdateUser = async (req, res, next) => {
     const user = await User.find({_id :req.params.id, active: true})
@@ -135,7 +142,68 @@ const UpdateUser = async (req, res, next) => {
         .then( () => res.status(200).json({message: "Utilisateur modifié."}))
         .catch( error => res.status(400).json({ error }))
     }
+};
+
+const List_employe_dispo = async (req, res, next) =>{
+    const date_debut = moment.tz(req.body.date,'GMT+3').format();
+    let duree = 0;
+    const details = req.body.rdv_details;
+    for(let i=0;i<details.length;i++){
+        var service = await Service.findOne({_id: details[i]})
+        duree = duree + service.duree;
+    } 
+    const date_fin = addHours(date_debut, duree)
+    return res.status(200).json( await Employe_disponible(date_debut, date_fin));
+};
+
+const Employe_disponible = async (date_1, date_2) =>{
+    date_1 = new Date(date_1);
+    date_2 = new Date(date_2);
+
+    date_filtre_1 = new Date(format(date_1, 'yyyy-MM-dd'))
+    date_filtre_2 = new Date(addHours(date_filtre_1, 24))
+
+    //Rdv
+    const Rdv_by_date = await Rdv.find({etat : RdvState.Rdv, date:{ $gte: date_filtre_1,$lt : date_filtre_2} });
+    const employe_en_rdv = [];
+    for(let i=0; i<Rdv_by_date.length;i++){
+        duree_rdv = await Rdv_controllers.TotalDureeRdv(Rdv_by_date[i]);
+        date_fin_rdv = new Date(addHours(Rdv_by_date[i].date, duree_rdv));
+
+        if(date_1 < Rdv_by_date[i].date){ // date avant date debut de rdv
+            if(date_2 > Rdv_by_date[i].date && date_2 < date_fin_rdv){ //Date aprs date debut rdv et date avant date fin rdv
+                employe_en_rdv.push(Rdv_by_date[i].employe_id)
+            }
+        }
+        if (date_1 >= Rdv_by_date[i].date){ // date apres ou egal debut rdv
+            if(date_2 < date_fin_rdv){ // date fin avant ou egale fin rv
+                employe_en_rdv.push(Rdv_by_date[i].employe_id)
+            }
+        }
+
+    }
+    //Permission
+    const Permission_by_date = await Permission.find({ date: {$gte: date_filtre_1, $lt: date_filtre_2}}).exec();
+    const employe_en_permission = [];
+    for(let i=0; i<Permission_by_date.length; i++)
+    {
+        date_fin_permission = new Date(addHours(Permission_by_date[i].date, Permission_by_date[i].duree))
+        
+        if (date_1 < Permission_by_date[i].date){ //date avant date debut permission
+            if (date_2 > Permission_by_date[i].date && date_2 < date_fin_permission){ //date fin apres date debut permission et date fin avant date fin permission
+                employe_en_permission.push(Permission_by_date[i].employe_id)
+            }
+        }
+        if (date_1 >= Permission_by_date[i].date){ //date aprs date debut permission
+            if(date_2 <= date_fin_permission){ //date fin avant date fin permission
+                employe_en_permission.push(Permission_by_date[i].employe_id)
+            }
+        }
+    }
+    List_user_dispo = await User.find({_id : {$nin: employe_en_permission, $nin: employe_en_rdv}, role: role_user.Employe})
+    return List_user_dispo;
 }
+
 
 const DeleteUser = async (req, res, next) => {
     const user = await User.find({_id: req.params.id, active: true})
@@ -145,10 +213,9 @@ const DeleteUser = async (req, res, next) => {
         await User.updateOne({_id: req.params.id}, {active: false})
         .then(() => res.status(200).json({message: "Utilisateur supprimé."}))
         .catch(error => res.status(400).json({ error }))
-    }
-    
+    };
 }
 
-module.exports = { Sign_up, Login, Logout, GetUser, AddUser, UpdateUser, DeleteUser}
+module.exports = { Sign_up, Login, Logout, GetUser, AddUser, UpdateUser, DeleteUser, Employe_disponible, List_employe_dispo}
 
 
