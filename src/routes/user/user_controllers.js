@@ -239,13 +239,20 @@ const temps_moyen_travail = async (req,res,next) =>{
     const dureeTravailFixe = 24*8*60*60*1000; //duree de travail fixe en millisecond (8h par jour et 24j par mois)
     const list_employe = await User.find({active: true, role: role_user.Employe});
     const list_permission = await Permission.find({date: {$gt: date_debut_mois, $lte: date_fin_mois}});
+    //const list_rdv = await Rdv.find({date: {$gt: date_debut_mois, $lte: date_fin_mois}})
+
     const Total_travail = list_employe.map(employe => {
         const Total_permission = list_permission.filter(permission => permission.employe_id.toString() === employe._id.toString())
         .reduce((total, permission) => total + permission.duree, 0);
+
+        /*const dureeTravailRdv = list_rdv.filter(rdv => rdv.employe_id.toString() === employe._id.toString())
+        .reduce((total, rdv) => total + Rdv_controllers.TotalDureeRdv(rdv), 0)
+        console.log(list_rdv)*/
+        //const duree_travail = dureeTravailRdv/24;
         const duree_travail = (dureeTravailFixe - Total_permission)/24;
-        return duree_travail/60/60/1000;
+        return {"employe_id":employe._id, "moyenne" : duree_travail/60/60/1000};
     })
-    return res.json(Total_travail)
+    return res.status(200).json(Total_travail)
 }
 
 

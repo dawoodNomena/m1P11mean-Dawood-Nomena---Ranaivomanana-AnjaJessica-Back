@@ -95,7 +95,7 @@ const Mail_notif_rdv = async (rdv) => {
     console.log('date_aujourdhui : ' + today)
 };
 
-cron.schedule('0 06 * * *', () => {
+cron.schedule('0 06 * * *', () => { // 6h du mat
     envoyerEmail();
   }, {
     timezone: 'Africa/Nairobi' // Indiquez le fuseau horaire pour la planification

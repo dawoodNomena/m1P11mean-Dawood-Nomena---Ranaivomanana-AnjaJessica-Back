@@ -101,5 +101,27 @@ const ListByEmploye = async (req, res, next) => {
         });
 };
 
+const ListTaskByEmploye = async (req, res, next) => {
+    const date_1 = moment.tz(req.body.date_1, 'GMT+3').format();
+    const date_2 = moment.tz(req.body.date_2, 'GMT+3').format();
+    const user_id = req.user.userId;
 
-module.exports = {AddRdv, TerminerRdv, ListByClient, ListByEmploye, TotalDureeRdv}
+    const list = await Details_rdv.find()
+    .populate('service_id')
+    .populate({
+        path: 'rdv_id',
+        match: {employe_id: user_id, etat: EtatRdv.Termine }
+    }).exec();
+    let sommeCommission = 0;
+    const suivi = list.map(details_rdv => {
+        if(details_rdv.rdv_id !== null){
+            const commission = details_rdv.service_id.prix * details_rdv.service_id.commission / 100;
+            sommeCommission = sommeCommission+ commission;
+            return {'client_id': details_rdv.rdv_id.client_id, 'service_id': details_rdv.service_id.nom, 'commission': commission}
+        }
+    });
+    return res.status(200).json({suivi, sommeCommission})
+};
+
+
+module.exports = {AddRdv, TerminerRdv, ListByClient, ListByEmploye, TotalDureeRdv, ListTaskByEmploye}
