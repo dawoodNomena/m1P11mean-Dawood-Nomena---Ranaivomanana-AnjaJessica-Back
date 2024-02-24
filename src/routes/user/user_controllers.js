@@ -144,6 +144,19 @@ const UpdateUser = async (req, res, next) => {
     }
 };
 
+
+const DeleteUser = async (req, res, next) => {
+    const user = await User.find({_id: req.params.id, active: true})
+    if (!user) {
+        res.status(404).json({message : "Utilisateur introuvable!"})
+    } else {
+        await User.updateOne({_id: req.params.id}, {active: false})
+        .then(() => res.status(200).json({message: "Utilisateur supprimé."}))
+        .catch(error => res.status(400).json({ error }))
+    };
+}
+
+
 const List_employe_dispo = async (req, res, next) =>{
     const date_debut = moment.tz(req.body.date,'GMT+3').format();
     let duree = 0;
@@ -204,18 +217,38 @@ const Employe_disponible = async (date_1, date_2) =>{
     return List_user_dispo;
 }
 
+const getMoisIndex = (string_mois) => {
+    list_mois = [
+        { 'janvier': 0 },{ 'février': 1 },{ 'mars': 2 },{ 'avril': 3 },{ 'mai': 4 },{ 'juin': 5 },{ 'juillet': 6 }, { 'août': 7 },{ 'septembre': 8 },{ 'octobre': 9 },{ 'novembre': 10 },{ 'décembre': 11 }
+    ];
+    for(let i=0; i<list_mois.length; i++ )
+    {
+        mois = list_mois[i];
+        if( Object.keys(mois)[0] === string_mois){
+            return mois[string_mois]
+        }
+    }
+};
 
-const DeleteUser = async (req, res, next) => {
-    const user = await User.find({_id: req.params.id, active: true})
-    if (!user) {
-        res.status(404).json({message : "Utilisateur introuvable!"})
-    } else {
-        await User.updateOne({_id: req.params.id}, {active: false})
-        .then(() => res.status(200).json({message: "Utilisateur supprimé."}))
-        .catch(error => res.status(400).json({ error }))
-    };
+const temps_moyen_travail = async (req,res,next) =>{
+    const mois = req.body.mois;
+    const annee = parseInt(req.body.annee);
+    const date_debut_mois = new Date(annee, parseInt(getMoisIndex(mois)), 1);
+    const date_fin_mois = new Date(annee, getMoisIndex(mois)+1, 0);
+
+    const dureeTravailFixe = 24*8*60*60*1000; //duree de travail fixe en millisecond (8h par jour et 24j par mois)
+    const list_employe = await User.find({active: true, role: role_user.Employe});
+    const list_permission = await Permission.find({date: {$gt: date_debut_mois, $lte: date_fin_mois}});
+    const Total_travail = list_employe.map(employe => {
+        const Total_permission = list_permission.filter(permission => permission.employe_id.toString() === employe._id.toString())
+        .reduce((total, permission) => total + permission.duree, 0);
+        const duree_travail = (dureeTravailFixe - Total_permission)/24;
+        return duree_travail/60/60/1000;
+    })
+    return res.json(Total_travail)
 }
 
-module.exports = { Sign_up, Login, Logout, GetUser, AddUser, UpdateUser, DeleteUser, Employe_disponible, List_employe_dispo}
+
+module.exports = { Sign_up, Login, Logout, GetUser, AddUser, UpdateUser, DeleteUser, Employe_disponible, List_employe_dispo, temps_moyen_travail}
 
 

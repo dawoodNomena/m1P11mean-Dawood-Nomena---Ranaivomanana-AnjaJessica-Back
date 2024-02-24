@@ -12,6 +12,7 @@ router.post('/logout',Authentification_token, controllers_user.Logout)
 //Profil
 router.get('/profil',Authentification_token, controllers_user.GetUser)
 router.get('/employe/disponible', Authentification_token, controllers_user.List_employe_dispo)
+router.get('/statistiques/temps_moyen_travail', Authentification_token,controllers_user.temps_moyen_travail)
 
 //Employe
 router.post('/employe/create',Authentification_token, controllers_user.AddUser)
