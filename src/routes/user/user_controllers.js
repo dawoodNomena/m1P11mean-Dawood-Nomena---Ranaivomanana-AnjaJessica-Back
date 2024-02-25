@@ -219,7 +219,7 @@ const Employe_disponible = async (date_1, date_2) =>{
 
 const getMoisIndex = (string_mois) => {
     list_mois = [
-        { 'janvier': 0 },{ 'février': 1 },{ 'mars': 2 },{ 'avril': 3 },{ 'mai': 4 },{ 'juin': 5 },{ 'juillet': 6 }, { 'août': 7 },{ 'septembre': 8 },{ 'octobre': 9 },{ 'novembre': 10 },{ 'décembre': 11 }
+        { 'janvier': 0 },{ 'fevrier': 1 },{ 'mars': 2 },{ 'avril': 3 },{ 'mai': 4 },{ 'juin': 5 },{ 'juillet': 6 }, { 'aout': 7 },{ 'septembre': 8 },{ 'octobre': 9 },{ 'novembre': 10 },{ 'decembre': 11 }
     ];
     for(let i=0; i<list_mois.length; i++ )
     {

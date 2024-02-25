@@ -3,9 +3,13 @@ const mongoo = require("mongoose")
 const Rdv = require("./rdv_model")
 const Details_rdv = require('./../rdv_details/rdv_details_model')
 const Service = require('./../service/service_model')
+const Depense = require('./../depense/depense_model')
 const User = require('./../user/user_model')
+const Salaire = require('./../salaire/salaire_model')
 const moment = require('moment-timezone');
 const EtatRdv = require('./../../static/Etat_rdv')
+const TypeDepense = require('./../../static/Type_depense')
+const UserRole = require('./../../static/Role_user')
 const {addHours, format} = require('date-fns');
 
 const AddRdv = async (req, res, next) => {
@@ -199,5 +203,88 @@ const Nombre_reservation = async (req, res, next) =>{
 
 };
 
+const getMoisIndex = (string_mois) => {
+    list_mois = [
+        { 'janvier': 0 },{ 'fevrier': 1 },{ 'mars': 2 },{ 'avril': 3 },{ 'mai': 4 },{ 'juin': 5 },{ 'juillet': 6 }, { 'aout': 7 },{ 'septembre': 8 },{ 'octobre': 9 },{ 'novembre': 10 },{ 'decembre': 11 }
+    ];
+    for(let i=0; i<list_mois.length; i++ )
+    {
+        mois = list_mois[i];
+        if( Object.keys(mois)[0] === string_mois){
+            return mois[string_mois]
+        }
+    }
+};
 
-module.exports = {AddRdv, TerminerRdv, ListByClient, ListByEmploye, TotalDureeRdv, ListTaskByEmploye, Nombre_reservation}
+const Chiffre_affaire = async (req,res, next) => {
+    const mois = req.body.mois;
+    const annee = parseInt(req.body.annee);
+    const date_debut_mois = new Date(annee, parseInt(getMoisIndex(mois)), 1);
+    const date_fin_mois = new Date(annee, getMoisIndex(mois)+1, 0);
+
+    const list_rdv_details = await Details_rdv.find();
+    const list_rdv = await Rdv.find({date: {$gte: date_debut_mois, $lt: date_fin_mois}, etat: EtatRdv.Termine});
+    const list_service = await Service.find();
+
+    const chiffreAffairesParDate = {};
+    list_rdv_details.forEach(details => {
+        const rdv = list_rdv.find(r => r._id.toString() === details.rdv_id.toString());
+        if (rdv) {
+            const date = rdv.date.toISOString().substring(0, 10); 
+
+            const ca = list_service.filter(service => details.service_id.toString() === service._id.toString())
+                //.reduce((total, service) => total + (service.prix - (service.commission/100)), 0); // CA miala commission
+                .reduce((total, service) => total + service.prix, 0); //CA complet
+            
+            if (!chiffreAffairesParDate[date]) {
+                chiffreAffairesParDate[date] = 0;
+            }
+            chiffreAffairesParDate[date] += ca;
+        }
+    });
+    res.status(200).json(chiffreAffairesParDate)
+};
+
+const Benefice_mensuel = async (req, res, next) =>{
+    const mois = req.body.mois;
+    const annee = parseInt(req.body.annee);
+    const date_debut_mois = new Date(annee, parseInt(getMoisIndex(mois)), 1);
+    const date_fin_mois = new Date(annee, getMoisIndex(mois)+1, 0);
+
+    //Total chiffre affaire
+    const list_rdv_details = await Details_rdv.find();
+    const list_rdv = await Rdv.find({date: {$gte: date_debut_mois, $lt: date_fin_mois}, etat: EtatRdv.Termine});
+    const list_service = await Service.find();
+    const chiffreAffairesTotal = list_rdv_details.reduce((total, details) => {
+        const rdv = list_rdv.find(r => r._id.toString() === details.rdv_id.toString());
+        if (rdv && rdv.date >= date_debut_mois && rdv.date < date_fin_mois) {
+            const ca = list_service.filter(service => details.service_id.toString() === service._id.toString())
+                .reduce((caTotal, service) => caTotal + (service.prix - (service.commission / 100)), 0); // efa miala ato commission
+            return total + ca;
+        }
+        return total;
+    }, 0);
+
+    //Total depense
+    const list_depense_fixe = await Depense.find({type: TypeDepense.Fixe});
+    const list_depense_du_mois = await Depense.find({type: TypeDepense.Non_Fixe, date:{$gte: date_debut_mois, $lt: date_fin_mois}});
+    const list_employe_active = await User.find({active: true, role: UserRole.Employe});
+    const list_salaire = await Salaire.find({date_fin: ""});
+    const depense_fixe = list_depense_fixe.reduce((total, depense) => total + depense.montant, 0);
+    const depense_non_fixe = list_depense_du_mois.reduce((total, depense) => total + depense.montant, 0)
+    var total_salaire = list_employe_active.map(employe => {
+        const salaire = list_salaire.filter(salaire => salaire.user_id.toString() === employe._id.toString())
+        .reduce((total, salaire) => total + salaire.somme, 0);
+        return salaire
+    });
+    total_salaire = total_salaire.reduce((total, item) => total + item, 0)
+    const totalDepense = depense_fixe + depense_non_fixe+ total_salaire;
+
+    const benefice = chiffreAffairesTotal - totalDepense;
+
+
+    res.status(200).json({"benefice": benefice, "total_ca": chiffreAffairesTotal, "charge_fixe": depense_fixe, "depense":depense_non_fixe, "total_salaire": total_salaire, "total_depense": totalDepense })
+};
+
+
+module.exports = {AddRdv, TerminerRdv, ListByClient, ListByEmploye, TotalDureeRdv, ListTaskByEmploye, Nombre_reservation, Chiffre_affaire, Benefice_mensuel}
