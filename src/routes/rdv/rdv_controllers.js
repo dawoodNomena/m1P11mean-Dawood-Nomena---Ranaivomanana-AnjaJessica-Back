@@ -3,8 +3,10 @@ const mongoo = require("mongoose")
 const Rdv = require("./rdv_model")
 const Details_rdv = require('./../rdv_details/rdv_details_model')
 const Service = require('./../service/service_model')
+const User = require('./../user/user_model')
 const moment = require('moment-timezone');
 const EtatRdv = require('./../../static/Etat_rdv')
+const {addHours, format} = require('date-fns');
 
 const AddRdv = async (req, res, next) => {
     const date = moment.tz(req.body.date, 'GMT+3').format();
@@ -102,26 +104,100 @@ const ListByEmploye = async (req, res, next) => {
 };
 
 const ListTaskByEmploye = async (req, res, next) => {
-    const date_1 = moment.tz(req.body.date_1, 'GMT+3').format();
-    const date_2 = moment.tz(req.body.date_2, 'GMT+3').format();
+    var date_1 = new Date(); 
+    var date_2 = new Date();
+    if(!req.body.date_1 && !req.body.date_2){
+        date_1 = new Date(2020, 0,1);
+        date_2 = new Date(2030, 11, 31);
+    }
+    else if (req.body.date_1 && !req.body.date_2){
+        date_1 = new Date(format(new Date(req.body.date_1), 'yyyy-MM-dd'))
+        date_2 = new Date(addHours(date_1, 24));
+    }
+    else if (req.body.date_1 && req.body.date_2){
+        date_1 = new Date(format(new Date(req.body.date_1), 'yyyy-MM-dd'));
+        date_2 = new Date(format(new Date(req.body.date_2), 'yyyy-MM-dd'));
+    }
+
     const user_id = req.user.userId;
 
     const list = await Details_rdv.find()
     .populate('service_id')
     .populate({
         path: 'rdv_id',
-        match: {employe_id: user_id, etat: EtatRdv.Termine }
+        match: {employe_id: user_id, etat: EtatRdv.Termine, date: {$gte: date_1, $lt: date_2} }
     }).exec();
+    list_filtered = list.filter(item => item.rdv_id !== null);
     let sommeCommission = 0;
-    const suivi = list.map(details_rdv => {
+    const suivi = list_filtered.map(details_rdv => {
         if(details_rdv.rdv_id !== null){
             const commission = details_rdv.service_id.prix * details_rdv.service_id.commission / 100;
             sommeCommission = sommeCommission+ commission;
-            return {'client_id': details_rdv.rdv_id.client_id, 'service_id': details_rdv.service_id.nom, 'commission': commission}
+            return {'client_id': details_rdv.rdv_id.client_id, 'date': details_rdv.rdv_id.date, 'service_id': details_rdv.service_id.nom, 'commission': commission}
         }
     });
     return res.status(200).json({suivi, sommeCommission})
 };
 
+const Nombre_reservation = async (req, res, next) =>{
+    var date_1 = new Date(); 
+    var date_2 = new Date();
+    if(!req.body.date_1 && !req.body.date_2){
+        date_1 = new Date(2020, 0,1);
+        date_2 = new Date(2030, 11, 31);
+    }
+    else if (req.body.date_1 && !req.body.date_2){
+        date_1 = new Date(format(new Date(req.body.date_1), 'yyyy-MM-dd'))
+        date_2 = new Date(addHours(date_1, 24));
+    }
+    else if (req.body.date_1 && req.body.date_2){
+        date_1 = new Date(format(new Date(req.body.date_1), 'yyyy-MM-dd'));
+        date_2 = new Date(format(new Date(req.body.date_2), 'yyyy-MM-dd'));
+    }
 
-module.exports = {AddRdv, TerminerRdv, ListByClient, ListByEmploye, TotalDureeRdv, ListTaskByEmploye}
+    const list = await Details_rdv
+    .aggregate([
+        {
+            $group: {
+                _id : {service_id :"$service_id"},
+                nombre: {$sum : 1},
+                rdv_id : { $first: "$rdv_id"}
+            }
+        },
+        {
+            $lookup: {
+                from: "rendez_vous",
+                localField: "rdv_id",
+                foreignField: "_id",
+                as: "rdv"
+            }
+        },
+        {
+            $match: { "rdv.date" : {$gte: date_1, $lt: date_2}}
+        },
+        {
+            $lookup: {
+              from: "services",
+              localField: "_id.service_id",
+              foreignField: "_id",
+              as: "service"
+            }
+        },
+        {
+            $unwind: "$service" 
+        }
+    ]).exec();
+
+    var nombre_reservation = [];
+    for(let i=0;i<list.length; i++){
+        nombre_reservation.push({
+            "service": `${list[i].service.nom} (${list[i].service.categorie})`,
+            "nombre": list[i].nombre,
+        })
+    }
+    return res.status(200).json(nombre_reservation);
+
+};
+
+
+module.exports = {AddRdv, TerminerRdv, ListByClient, ListByEmploye, TotalDureeRdv, ListTaskByEmploye, Nombre_reservation}

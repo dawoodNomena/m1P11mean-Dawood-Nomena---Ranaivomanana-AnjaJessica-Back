@@ -8,5 +8,6 @@ router.post('/done/:id', Authentification_token, controllers_rdv.TerminerRdv)
 router.get('/historique', Authentification_token, controllers_rdv.ListByClient)
 router.get('/mes_rdv', Authentification_token, controllers_rdv.ListByEmploye)
 router.get('/taches/suivi', Authentification_token,controllers_rdv.ListTaskByEmploye)
+router.get('/statistiques/nombre_reservation', Authentification_token,controllers_rdv.Nombre_reservation)
 
 module.exports = router;
