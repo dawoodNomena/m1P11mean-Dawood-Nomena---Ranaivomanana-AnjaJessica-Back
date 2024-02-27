@@ -75,6 +75,16 @@ const ListByClient = async (req, res, next) => {
         })
 };
 
+const GetOne = async (req, res, next) => {
+    const id = req.params.id;
+    const rdv = await Rdv.findOne({_id: id});
+    const details = await Details_rdv.find({rdv_id: rdv._id}).populate('service_id');
+    const list_details = details.map(item =>{
+        return {"nom_service": item.service_id.nom, "duree": item.service_id.duree, "prix": item.service_id.prix}
+    });
+    res.status(200).json({"rdv": rdv, "rdv_details": list_details});
+};
+
 const TotalDureeRdv = async (rdv) => {
     const details = await Details_rdv.find({rdv_id: rdv._id}).exec()
     let somme = 0;
@@ -287,4 +297,4 @@ const Benefice_mensuel = async (req, res, next) =>{
 };
 
 
-module.exports = {AddRdv, TerminerRdv, ListByClient, ListByEmploye, TotalDureeRdv, ListTaskByEmploye, Nombre_reservation, Chiffre_affaire, Benefice_mensuel}
+module.exports = {AddRdv, TerminerRdv, ListByClient, ListByEmploye, TotalDureeRdv, ListTaskByEmploye, Nombre_reservation, Chiffre_affaire, Benefice_mensuel, GetOne}

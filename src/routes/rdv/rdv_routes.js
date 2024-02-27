@@ -5,6 +5,7 @@ const Authentification_token = require("./../../middleware/Auth_middleware");
 
 router.post('/add', Authentification_token, controllers_rdv.AddRdv)
 router.post('/done/:id', Authentification_token, controllers_rdv.TerminerRdv)
+router.get('/detail/:id', Authentification_token, controllers_rdv.GetOne)
 router.get('/historique', Authentification_token, controllers_rdv.ListByClient)
 router.get('/mes_rdv', Authentification_token, controllers_rdv.ListByEmploye)
 router.get('/taches/suivi', Authentification_token,controllers_rdv.ListTaskByEmploye)

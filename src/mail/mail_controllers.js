@@ -10,8 +10,8 @@ const cron = require('node-cron');
 let transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'dawoodnomena@gmail.com',
-        pass: 'eocnzcpeemjyeptz'
+        user: process.env.USER_MAIL_AUTH,
+        pass: process.env.USER_MAIL_PASS
     }
 });
 
