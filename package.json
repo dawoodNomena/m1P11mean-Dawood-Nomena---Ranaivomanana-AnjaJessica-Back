@@ -1,16 +1,29 @@
 {
-  "name": "m1P11mean-Dawood-Nomena---Ranaivomanana-AnjaJessica-Back",
+  "name": "m1p11mean-dawood-nomena---ranaivomanana-anja-jessica-back",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
+    "start": "node ./bin/www",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "date-fns": "^3.3.1",
+    "dotenv": "^16.4.5",
     "express": "^4.18.2",
+    "json-stringify-safe": "^5.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "mailgun-js": "^0.22.0",
+    "moment-timezone": "^0.5.45",
     "mongodb": "^6.3.0",
-    "mongoose": "^8.1.1"
+    "mongoose": "^8.1.1",
+    "mongoose-unique-validator": "^5.0.0",
+    "morgan": "^1.10.0",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.10"
   }
 }
