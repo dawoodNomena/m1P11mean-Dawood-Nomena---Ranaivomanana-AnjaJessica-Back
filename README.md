@@ -1,0 +1,11 @@
+!! DOCUMENTATION POSTMAN DU BACK-END MEAN SALON DE BEAUTE!!
+- Authentification documentation : https://meansalondebeaute.postman.co/workspace/My-Workspace~a2b31239-1b31-40fc-8f20-60b507f3b289/documentation/32953349-8fa9d24b-cf4d-4ab6-bca8-ebf2b512f425
+- Depense documentation: https://meansalondebeaute.postman.co/workspace/a2b31239-1b31-40fc-8f20-60b507f3b289/documentation/32953349-8ea59f29-d8fd-4a6b-83da-a9f43292df7a
+- Offre spéciale documentation: https://meansalondebeaute.postman.co/workspace/a2b31239-1b31-40fc-8f20-60b507f3b289/documentation/32953349-da10db5f-3559-4065-a028-aefb6fd33939
+- Paiement documentation : https://meansalondebeaute.postman.co/workspace/a2b31239-1b31-40fc-8f20-60b507f3b289/documentation/32953349-2cc3d1bf-ef43-43df-8f55-9381386d7aff
+- Permission documentation : https://meansalondebeaute.postman.co/workspace/a2b31239-1b31-40fc-8f20-60b507f3b289/documentation/32953349-5aedbe26-1737-4b0b-b548-15af93bdc2a0
+- Preference documentation: https://meansalondebeaute.postman.co/workspace/a2b31239-1b31-40fc-8f20-60b507f3b289/documentation/32953349-b768c4bc-c305-4a80-992b-881cd967a8e6
+- Rendez-vous documentation : https://meansalondebeaute.postman.co/workspace/a2b31239-1b31-40fc-8f20-60b507f3b289/documentation/32953349-814ab510-87b2-491d-a3ad-0b921cd0299d
+- Salaire documentation: https://meansalondebeaute.postman.co/workspace/a2b31239-1b31-40fc-8f20-60b507f3b289/documentation/32953349-1797dbd2-087d-4feb-8868-adef70d3f964
+- Service documentation: https://meansalondebeaute.postman.co/workspace/a2b31239-1b31-40fc-8f20-60b507f3b289/documentation/32953349-9fc7fe58-9bd8-425c-9874-8731bbf9ba6d
+- User documentation : https://meansalondebeaute.postman.co/workspace/a2b31239-1b31-40fc-8f20-60b507f3b289/documentation/32953349-9d866d9d-4a16-4299-a8c9-5469819d634e
